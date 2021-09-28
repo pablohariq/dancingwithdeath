@@ -1,15 +1,15 @@
 const express = require('express')
 const app = express()
 const path = require('path')
+const routes = require('./routes/death')
 
 app.use(express.json())
+app.use("/", routes)
 
-const rutaRaiz = path.join(__dirname, "..")
+const root = path.join(__dirname, "..")
 
-console.log(rutaRaiz)
+//public paths
+app.use("/css", express.static(path.join(root, "public", "css")))
 
-app.get("/", (req, res) => {
-    res.sendFile(path.join(rutaRaiz,"public","index.html"))
-})
 
-app.listen(3000, () => console.log("Servidor iniciado en puerto 3000"))
+app.listen(3000, () => console.log("Server up in port 3000"))
