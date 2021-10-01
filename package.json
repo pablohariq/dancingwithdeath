@@ -4,5 +4,8 @@
     "express": "^4.17.1",
     "moment": "^2.29.1",
     "sweetalert2": "^11.1.7"
+  },
+  "scripts": {
+    "start": "node server/server.js"
   }
 }

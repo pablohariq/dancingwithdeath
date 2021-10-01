@@ -125,14 +125,14 @@ export const renderTable = (dailyAppointments) => {
     </tr>
     </thead>
     `
-    dailyAppointments.forEach(a => {
+    dailyAppointments.forEach(({startTime, endTime, name, email, id}) => {
         tableBody.innerHTML += `
         <tr class="align-items-center">
-          <th scope="row">${a.startTime} - ${a.endTime}</th>
-          <td>${a.name}</td>
-          <td>${a.email}</td>
-          <td><button class="btn btn-warning" data-id="${a.id}">Edit</button></td>
-          <td><button class="btn btn-danger" data-id="${a.id}">Delete</button></td>
+          <th scope="row">${startTime} - ${endTime}</th>
+          <td>${name}</td>
+          <td>${email}</td>
+          <td><button class="btn btn-warning" data-id="${id}">Edit</button></td>
+          <td><button class="btn btn-danger" data-id="${id}">Delete</button></td>
         </tr>
         `
     });
