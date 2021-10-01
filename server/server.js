@@ -14,5 +14,5 @@ app.use("/js", express.static(path.join(root, "public", "js")))
 app.use("/sweetalert", express.static(path.join(root, "node_modules", "sweetalert2", "dist")))
 
 
-
-app.listen(3000, () => console.log("Server up in port 3000"))
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => console.log("Server up in port 3000"))
