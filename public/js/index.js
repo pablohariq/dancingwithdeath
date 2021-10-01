@@ -80,11 +80,12 @@ newAppointmentForm.addEventListener("submit", async (e) => {
               window.location.reload()
           })
     }
-    else{
+    else if(response.status == 400){
+        const data = await response.json()
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'Something has gone wrong. Please try again.',
+            text: data.message,
             showCancelButton: false,
             confirmButtonText: 'Ok',
           }).then(() => {

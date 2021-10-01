@@ -127,7 +127,7 @@ export const renderTable = (dailyAppointments) => {
     `
     dailyAppointments.forEach(a => {
         tableBody.innerHTML += `
-        <tr>
+        <tr class="align-items-center">
           <th scope="row">${a.startTime} - ${a.endTime}</th>
           <td>${a.name}</td>
           <td>${a.email}</td>

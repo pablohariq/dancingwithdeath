@@ -34,8 +34,14 @@ const readAppointments = (req, res) => {
 const createAppointment = (req, res) => {
     const newAppointmentData = req.body
     const {date, startTime} = newAppointmentData
-    console.log(`${date} ${startTime}`)
     const momentAppt = moment(`${date} ${startTime}:00`)
+    
+    //week day validation
+    const dayOfWeek = momentAppt.format("ddd")
+    if (dayOfWeek == "Sat" || dayOfWeek == "Sun"){
+        return res.status(400).send({message: "Appointments with Death can only be made during business days (Mon-Fri)."})
+    }
+
     const endTime = momentAppt.add(1,'hours').format("HH:mm") 
 
     newAppointmentData.endTime = endTime //endTime of appointment calculated as 1 hour before the start time

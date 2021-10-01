@@ -5,3 +5,6 @@
 .modal-content{
     background-color: #00000F;
 } */
+.table td, .table th{
+    vertical-align: middle;
+}
