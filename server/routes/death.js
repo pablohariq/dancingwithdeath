@@ -6,6 +6,7 @@ const router = express.Router()
 
 router.get("/", deathControllers.showHomeView)
 
+router.get("/appointments", deathControllers.readAppointments)
 router.post("/appointments", deathControllers.createAppointment)
 
 
