@@ -14,10 +14,20 @@ const showHomeView = (req, res) => {
 
 // /appointments GET
 const readAppointments = (req, res) => {
+    const {id} = req.query
     const appointmentsArray = JSON.parse(fs.readFileSync(dbpath, "utf-8"))
-    console.log(appointmentsArray)
-    res.send(JSON.stringify(appointmentsArray))
-
+    if (id){ //if query string is passed return only the matching id appointment
+        const requestedAppointmentById = appointmentsArray.find(a => a.id == id)
+        if (requestedAppointmentById){
+            res.status(200).send(requestedAppointmentById)
+        }
+        else{
+            res.status(400).end()
+        }
+    }
+    else{ //else return all appointments
+        res.send(JSON.stringify(appointmentsArray))
+    }
 }
 
 // /appointments POST
@@ -36,4 +46,33 @@ const createAppointment = (req, res) => {
     res.end()
 }
 
-module.exports = {showHomeView, createAppointment, readAppointments}
+// /appointments PUT
+const updateAppointment = (req, res) => {
+    const {id} = req.query
+    const updatedAppointmentData = req.body
+    const {date, startTime} = updatedAppointmentData
+    console.log(updatedAppointmentData)
+    const momentAppt = moment(`${date} ${startTime}:00`)
+
+    //update endTime and write id
+    const endTime = momentAppt.add(1,'hours').format("HH:mm") 
+    updatedAppointmentData.endTime = endTime
+    // updatedAppointmentData.id = id //unnecesary since is sent in body
+
+    const appointmentsArray = JSON.parse(fs.readFileSync(dbpath, "utf-8"))
+    const index = appointmentsArray.findIndex(a => a.id == id)
+    appointmentsArray[index] = updatedAppointmentData
+    fs.writeFileSync(dbpath, JSON.stringify(appointmentsArray))
+    res.end()
+}
+
+// / appointments DELETE
+const deleteAppointment = (req, res) => {
+    const {id} = req.query
+    const appointmentsArray = JSON.parse(fs.readFileSync(dbpath, "utf-8"))
+    const index = appointmentsArray.findIndex(a => a.id == id)
+    appointmentsArray.splice(index, 1)
+    fs.writeFileSync(dbpath, JSON.stringify(appointmentsArray))
+    res.status(200).end()
+}
+module.exports = {showHomeView, createAppointment, readAppointments, updateAppointment, deleteAppointment}

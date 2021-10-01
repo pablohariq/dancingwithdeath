@@ -1,3 +1,4 @@
+import { getAppointments } from "./index.js"
 const officeHours = [
     "09:00",
     "10:00",
@@ -9,10 +10,82 @@ const officeHours = [
     "16:00",
     "17:00"
 ]
+const requestEdit = async (e) => {
+    const id = e.target.getAttribute("data-id")
+    const response = await fetch(`/appointments?id=${id}`, {method: "GET"} )
+    const appointmentData = await response.json()
+    const {name, email, date, startTime} = appointmentData
+    console.log(appointmentData)
+
+    //fill modal update form with appointment data
+    const updateFormInputs = [...document.querySelectorAll("#updateAppointmentForm input")]
+    updateFormInputs[0].value = appointmentData.name
+    updateFormInputs[1].value = appointmentData.email
+    updateFormInputs[2].value = appointmentData.date
+
+    //fill select options with available hours for a day
+    const appointments = await getAppointments()
+    const appointmentsForSelectedDate = scheduledAppointmentsByDate(appointments, date)
+    const availableHours = availableHoursByDate(appointmentsForSelectedDate) //todo: wrap this in a function
+    const updatehourSelect = document.querySelectorAll("#updateAppointmentForm select")
+    availableHours.forEach(h => {
+        updatehourSelect.innerHTML += `<option value="${h}">${h}</option>`
+    })
+
+    //set the modal form property that will make the put request
+    document.querySelector("#updateAppointmentForm").addEventListener("submit", async (e) => {
+        e.preventDefault()
+        const formData = new FormData(e.target)
+        const body = Object.fromEntries(formData)
+        const response = await fetch(`/appointments?id=${id}`, {
+            method: "PUT", 
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        })
+    })
+    //trigger modal
+    document.querySelector("#updateFormModal").classList.toggle("modal")
+
+}
+
+const requestDelete = (e) => {
+    const id = e.target.getAttribute("data-id")
+    Swal.fire({
+        icon: 'warning',
+        title: 'Confirmation',
+        text: '¿Are you sure you want to delete this appointment?',
+        showCancelButton: true,
+        confirmButtonText: 'Delete',
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+            const response = await fetch(`/appointments?id=${id})`, {method: "DELETE"})
+            if (response.status == 200) {
+                Swal.fire('Deleted succesfully!', '', 'success').then(() => {
+                    window.location.reload()
+                })
+            }
+        }
+        })
+    }
+
+      
+
 
 //find scheduled appointments for a given day from all the appointments
 export const scheduledAppointmentsByDate = (appointments, date) => {
-    return appointments.filter(a => a.date == date)
+    const dailyUnsortedAppointments = appointments.filter(a => a.date == date)
+    const dailySortedAppointments = dailyUnsortedAppointments.sort((a, b) => {
+        if (a.startTime > b.startTime){
+            return 1
+        }
+        else{
+            return -1
+        }
+    })
+    console.log(dailySortedAppointments)
+    return dailySortedAppointments
 }
 
 //return available hours for a given day as an array
@@ -22,4 +95,39 @@ export const availableHoursByDate = (scheduledAppointmentsForADay) => {
     return availableHours
 }
 
-// module.exports = {scheduledAppointmentsByDate, availableHoursByDate}
+export const renderTable = (dailyAppointments) => {
+    const tableBody = document.querySelector("#scheduledHoursTable tbody")
+    tableBody.innerHTML = ""
+    tableBody.innerHTML += `
+    <thead>
+    <tr>
+      <th>Time</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th></th>
+      <th></th>
+    </tr>
+    </thead>
+    `
+    dailyAppointments.forEach(a => {
+        tableBody.innerHTML += `
+        <tr>
+          <th scope="row">${a.startTime} - ${a.endTime}</th>
+          <td>${a.name}</td>
+          <td>${a.email}</td>
+          <td><button class="btn btn-warning" data-id="${a.id}">Edit</button></td>
+          <td><button class="btn btn-danger" data-id="${a.id}">Delete</button></td>
+        </tr>
+        `
+    });
+
+    [...document.querySelectorAll(".btn-warning")].forEach(b => {
+        b.addEventListener("click", requestEdit)
+    });
+    [...document.querySelectorAll(".btn-danger")].forEach(b => {
+        b.addEventListener("click", requestDelete)
+    })
+}
+
+
+// module.exports = {scheduledAppointmentsByDate, availableHoursByDate, renderTable}
