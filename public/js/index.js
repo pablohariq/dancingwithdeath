@@ -17,10 +17,15 @@ dateSelector.addEventListener("change", async (e) => {
 })
 
 //initialize calendar and table header with current date
-const tableHeader = document.querySelector("#selectedDateHeader")
-const currentDate = new Date().toISOString().slice(0,10)
-// dateSelector.value = currentDate
-tableHeader.innerHTML = "Select a date to see scheduled appointments"
+const tableHeader = document.querySelector("#selectedDateHeader");
+(async () => {
+    const currentDate = new Date().toISOString().slice(0,10)
+    dateSelector.value = currentDate
+    const appointments = await getAppointments()
+    const appointmentsForCurrentDate = scheduledAppointmentsByDate(appointments, currentDate)
+    renderTable(appointmentsForCurrentDate)
+    tableHeader.innerHTML = new Date(currentDate).toUTCString().slice(0,16)
+})();
 
 
 
@@ -63,6 +68,28 @@ newAppointmentForm.addEventListener("submit", async (e) => {
         },
         body: JSON.stringify(body)
     })
+    if (response.status == 200){
+        Swal.fire({
+            icon: 'success',
+            title: 'Created',
+            text: 'Appointment created succesfully.',
+            showCancelButton: false,
+            confirmButtonText: 'Ok',
+          }).then(() => {
+              $("#createFormModal").modal()
+              window.location.reload()
+          })
+    }
+    else{
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something has gone wrong. Please try again.',
+            showCancelButton: false,
+            confirmButtonText: 'Ok',
+          }).then(() => {
+          })
+    }
 })
 
 // const editAppointment = (e) => {

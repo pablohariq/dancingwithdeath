@@ -27,16 +27,20 @@ const requestEdit = async (e) => {
     const appointments = await getAppointments()
     const appointmentsForSelectedDate = scheduledAppointmentsByDate(appointments, date)
     const availableHours = availableHoursByDate(appointmentsForSelectedDate) //todo: wrap this in a function
-    const updatehourSelect = document.querySelectorAll("#updateAppointmentForm select")
+    const updatehourSelect = document.querySelector("#updateAppointmentForm select")
+    updatehourSelect.innerHTML = ""
+    console.log(availableHours)
     availableHours.forEach(h => {
         updatehourSelect.innerHTML += `<option value="${h}">${h}</option>`
     })
 
     //set the modal form property that will make the put request
     document.querySelector("#updateAppointmentForm").addEventListener("submit", async (e) => {
+        console.log(id)
         e.preventDefault()
         const formData = new FormData(e.target)
         const body = Object.fromEntries(formData)
+        body.id = id
         const response = await fetch(`/appointments?id=${id}`, {
             method: "PUT", 
             headers: {
@@ -44,9 +48,21 @@ const requestEdit = async (e) => {
             },
             body: JSON.stringify(body)
         })
-    })
+        if (response.status == 200){
+            Swal.fire({
+                icon: 'success',
+                title: 'Update',
+                text: 'Appointment updated succesfully.',
+                showCancelButton: false,
+                confirmButtonText: 'Ok',
+              })
+              .then(() => {window.location.reload()})
+            }
+        });
+
     //trigger modal
-    document.querySelector("#updateFormModal").classList.toggle("modal")
+    const $updateFormModal = $("#updateFormModal")
+    $updateFormModal.modal()
 
 }
 
